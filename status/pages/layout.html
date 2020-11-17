@@ -1,0 +1,33 @@
+<body>
+<h1>{{.PageTitle}}</h1>
+<hr />
+<p>Links:</p>
+<ul>
+    
+    {{range .Links}}
+        <li id="{{ . }}">{{ . }}</li>
+    {{end}}
+   
+</ul>
+<hr />
+<br/>
+<div id="output"></div>
+</body>
+<script>
+    var output = document.getElementById("output");
+    var socket = new WebSocket("ws://{{ .WebsocketLocation }}/echo");
+
+    socket.onopen = function () {
+        output.innerHTML = "Status: Checking every 5 seconds\n";
+    };
+
+    socket.onmessage = function (e) {
+        var data = JSON.parse(e.data);
+        var linkRef = document.getElementById(data.link);
+
+        var status = data.status === "up" ? "UP" : "X"; 
+        linkRef.innerHTML = status + " " + data.link + " since: " + new Date(data.lastUpdated).toLocaleString()
+        output.innerHTML = "Server: " + e.data + "\n";
+
+    };
+</script>
